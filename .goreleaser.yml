@@ -1,0 +1,62 @@
+project_name: uptrends-operator
+
+builds:
+  -
+    id: operator
+    binary: operator-{{.Os}}-{{.Arch}}
+    main: cmd/operator/main.go
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm
+      - arm64
+    ignore:
+        - goos: darwin
+          goarch: 386
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+        - -s -w
+    no_unique_dist_dir: true
+
+archives:
+  -
+    id: operator
+    builds:
+      - operator
+    name_template: "operator_{{.Version}}_{{.Os}}_{{.Arch}}"
+
+dockers:
+  -
+    dockerfile: Dockerfile
+    goos: linux
+    goarch: amd64
+    ids:
+      - operator
+    image_templates:
+      - "ghcr.io/ionos-cloud/{{.ProjectName}}/operator:latest"
+      - "ghcr.io/ionos-cloud/{{.ProjectName}}/operator:{{.Tag}}"
+      - "ghcr.io/ionos-cloud/{{.ProjectName}}/operator"
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--build-arg=BINARY=operator-linux-amd64"
+      - "--platform=linux/amd64"
+
+gomod:
+  proxy: false
+
+release:
+  draft: false
+  extra_files:
+    - glob: ./manifests/install.yaml
+
+snapshot:
+  name_template: "{{.Tag}}"
+
+checksum:
+  name_template: "octopinger_go_checksums.txt"
