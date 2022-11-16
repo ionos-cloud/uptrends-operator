@@ -42,10 +42,10 @@ func NewInformer(
 	informer := cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (runtime.Object, error) {
-				return client.CoreV1().Services(corev1.NamespaceAll).List(context.TODO(), options)
+				return client.NetworkingV1().Ingresses(corev1.NamespaceAll).List(context.TODO(), options)
 			},
 			WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-				return client.CoreV1().Services(corev1.NamespaceAll).Watch(context.TODO(), options)
+				return client.NetworkingV1().Ingresses(corev1.NamespaceAll).Watch(context.TODO(), options)
 			},
 		},
 		&networkingv1.Ingress{},
@@ -103,7 +103,9 @@ func (c *ServiceController) Run(stop <-chan struct{}) error {
 }
 
 func (c *ServiceController) enqueue(obj interface{}) {
-	_ = obj.(*networkingv1.Ingress)
+	in := obj.(*networkingv1.Ingress)
+
+	klog.Infof("create new monitor: %s", in.Name)
 }
 
 func (c *ServiceController) handleUpdate(old, new interface{}) {
