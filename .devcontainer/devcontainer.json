@@ -12,6 +12,7 @@
     "postCreateCommand": "bash scripts/postCreateCommand.sh",
     "features": {
         "docker-in-docker": "latest",
+        "kubectl-helm-minikube": "latest",
         "node": "latest",
         "golang": "1.19"
     },

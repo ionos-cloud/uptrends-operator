@@ -21,16 +21,6 @@ generate:
 		--file manifests/install/statefulset.yaml \
 		--output manifests/install.yaml
 
-docker-minikube:
-	minikube -p uptrends-operator image rm ${IMG}
-	minikube -p uptrends-operator image rm ghcr.io/ionos-cloud/uptrends-operator/uptrends-operator:v$(VERSION)
-
-	@docker build --build-arg BINARY=uptrends-operator-linux-amd64 -f Dockerfile -t ghcr.io/ionos-cloud/uptrends-operator/uptrends-operator:v$(VERSION) ./dist
-	@docker build --build-arg BINARY=operator-linux-amd64 -f Dockerfile.nonroot -t ${IMG} ./dist
-
-	minikube -p uptrends-operator image load ${IMG}
-	minikube -p uptrends-operator image load ghcr.io/ionos-cloud/uptrends-operator/uptrends-operator:v$(VERSION)
-
 ##@ Build
 
 .PHONY: fmt
