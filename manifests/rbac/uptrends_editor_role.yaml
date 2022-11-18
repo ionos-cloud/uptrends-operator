@@ -1,0 +1,24 @@
+# permissions for end users to edit uptrends.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: uptrends-editor-role
+rules:
+- apiGroups:
+  - uptrends.ionos-cloud.github.io
+  resources:
+  - uptrends
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - uptrends.ionos-cloud.github.io
+  resources:
+  - uptrends/status
+  verbs:
+  - get

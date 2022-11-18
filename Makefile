@@ -1,4 +1,4 @@
-VERSION ?= 0.0.33
+VERSION ?= 0.0.1
 
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.25.0
@@ -14,7 +14,7 @@ IMG ?= $(IMAGE_TAG_BASE):v$(VERSION)
 
 generate:
 	@go generate ./...
-	@go run cmd/manifest/manifest.go --file manifests/crd/bases/uptrends-operator.io_uptrends-operators.yaml \
+	@go run cmd/manifest/manifest.go --file manifests/crd/bases/uptrends.ionos-cloud.github.io_uptrends.yaml \
 		--file manifests/install/service_account.yaml \
 		--file manifests/install/cluster_role.yaml \
 		--file manifests/install/cluster_role_binding.yaml \

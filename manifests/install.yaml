@@ -1,0 +1,149 @@
+---
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.6.1
+  creationTimestamp: null
+  name: uptrends.uptrends.ionos-cloud.github.io
+spec:
+  group: uptrends.ionos-cloud.github.io
+  names:
+    kind: Uptrends
+    listKind: UptrendsList
+    plural: uptrends
+    singular: uptrends
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Uptrends is the Schema for the uptrends API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: UptrendsSpec defines the desired state of Uptrends
+            type: object
+          status:
+            description: UptrendsStatus defines the observed state of Uptrends
+            properties:
+              controlPaused:
+                description: ControlPaused indicates the operator pauses the control
+                  of Uptrends.
+                type: boolean
+              phase:
+                description: Phase is the Uptrends running phase.
+                type: string
+            required:
+            - phase
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: uptrends-controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: uptrends-controller
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- nonResourceURLs:
+  - '*'
+  verbs:
+  - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name:  uptrends-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: uptrends-controller
+subjects:
+- kind: ServiceAccount
+  name: uptrends-controller
+  namespace: uptrends
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: uptrends-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: uptrends-controller
+  serviceName: uptrends-controller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: uptrends-controller
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: uptrends-controller
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/part-of: uptrends
+              topologyKey: kubernetes.io/hostname
+            weight: 5
+      containers:
+      - command:
+        - /main
+        image: ghcr.io/ionos-cloud/uptrends/operator:v0.0.1
+        name: operator
+        securityContext:
+          allowPrivilegeEscalation: false
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      terminationGracePeriodSeconds: 10
+      serviceAccountName: uptrends-controller
