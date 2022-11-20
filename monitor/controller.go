@@ -3,6 +3,10 @@ package monitor
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
+	v1alpha1 "github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -106,6 +110,53 @@ func (c *ServiceController) enqueue(obj interface{}) {
 	in := obj.(*networkingv1.Ingress)
 
 	klog.Infof("create new monitor: %s", in.Name)
+
+	items := make(map[string]string)
+
+	for k, v := range in.Annotations {
+		if strings.HasPrefix(k, v1alpha1.AnnotationPrefix) {
+			items[strings.TrimPrefix(k, v1alpha1.AnnotationPrefix)] = v
+		}
+	}
+
+	for _, r := range in.Spec.Rules {
+		if r.Host == "" {
+			continue
+		}
+
+		if strings.HasPrefix(r.Host, "*") {
+			continue
+		}
+
+		m := v1alpha1.Uptrends{
+			ObjectMeta: metav1.ObjectMeta{
+				Namespace: in.Namespace,
+				Name:      r.Host,
+			},
+			Spec: v1alpha1.UptrendsSpec{
+				Type: "HTTPS",
+			},
+		}
+
+		if v, ok := items["type"]; ok {
+			m.Spec.Type = v
+		}
+
+		if v, ok := items["interval"]; ok {
+			if i, err := strconv.Atoi(v); err == nil {
+				m.Spec.Interval = i
+			}
+		}
+
+		if m.Spec.Type == "HTTPS" {
+			m.Spec.Url = "https://" + r.Host
+		}
+
+		if m.Spec.Type == "HTTP" {
+			m.Spec.Url = "http://" + r.Host
+		}
+	}
+
 }
 
 func (c *ServiceController) handleUpdate(old, new interface{}) {
