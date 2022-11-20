@@ -35,6 +35,28 @@ spec:
             type: object
           spec:
             description: UptrendsSpec defines the desired state of Uptrends
+            properties:
+              description:
+                description: Description of the Monitor.
+                type: string
+              interval:
+                description: Interval of the Monitor.
+                type: integer
+              name:
+                description: Name of the Monitor.
+                type: string
+              type:
+                description: Type of the Monitor.
+                type: string
+              url:
+                description: Url of the Monitor.
+                type: string
+            required:
+            - description
+            - interval
+            - name
+            - type
+            - url
             type: object
           status:
             description: UptrendsStatus defines the observed state of Uptrends

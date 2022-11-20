@@ -7,6 +7,8 @@ import (
 const (
 	// CRDResourceKind ...
 	CRDResourceKind = "Uptrends"
+	// AnnotationPrefix ...
+	AnnotationPrefix = "uptrends.ionos-cloud.github.io/monitor."
 )
 
 func init() {
@@ -35,6 +37,16 @@ type Uptrends struct {
 // UptrendsSpec defines the desired state of Uptrends
 // +k8s:openapi-gen=true
 type UptrendsSpec struct {
+	// Type of the Monitor.
+	Type string `json:"type"`
+	// Name of the Monitor.
+	Name string `json:"name"`
+	// Description of the Monitor.
+	Description string `json:"description"`
+	// Interval of the Monitor.
+	Interval int `json:"interval"`
+	// Url of the Monitor.
+	Url string `json:"url"`
 }
 
 //+kubebuilder:object:root=true

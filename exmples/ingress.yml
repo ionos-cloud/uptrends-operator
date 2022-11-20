@@ -3,8 +3,8 @@ kind: Ingress
 metadata:
   name: my-ingress
   annotations:
-    ionos.cloud/monitor.type: HTTPS
-    ionos.cloud/monitor.interval: "600"
+    uptrends.ionos-cloud.github.i/monitor.type: HTTPS
+    uptrends.ionos-cloud.github.i/monitor.interval: "5"
 spec:
   rules:
   - host: ionos.cloud
