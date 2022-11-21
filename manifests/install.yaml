@@ -66,6 +66,9 @@ spec:
                 description: ControlPaused indicates the operator pauses the control
                   of Uptrends.
                 type: boolean
+              monitorGuid:
+                description: MonitorGuid is the ID of the Uptrends Monitor.
+                type: string
               phase:
                 description: Phase is the Uptrends running phase.
                 type: string

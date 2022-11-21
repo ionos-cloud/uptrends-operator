@@ -77,6 +77,9 @@ type UptrendsStatus struct {
 	// ControlPaused indicates the operator pauses the control of
 	// Uptrends.
 	ControlPaused bool `json:"controlPaused,omitempty"`
+
+	// MonitorGuid is the ID of the Uptrends Monitor.
+	MonitorGuid string `json:"monitorGuid,omitempty"`
 }
 
 // IsFailed ...

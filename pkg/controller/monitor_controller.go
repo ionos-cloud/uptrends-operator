@@ -5,6 +5,7 @@ import (
 
 	"github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
 	"github.com/ionos-cloud/uptrends-operator/pkg/credentials"
+	"github.com/ionos-cloud/uptrends-operator/pkg/finalizers"
 
 	"github.com/antihax/optional"
 	sw "github.com/ionos-cloud/uptrends-go"
@@ -56,16 +57,83 @@ func (m *monitorReconcile) Reconcile(ctx context.Context, r reconcile.Request) (
 		return reconcile.Result{}, err
 	}
 
-	err = m.reconcileResource(ctx, mon)
+	// Delete if timestamp is set
+	if !mon.ObjectMeta.DeletionTimestamp.IsZero() {
+		if finalizers.HasFinalizer(mon, v1alpha1.FinalizerName) {
+			m.reconcileDelete(ctx, mon)
+		}
+
+		// Delete
+		return ctrl.Result{}, nil
+	}
+
+	err = m.reconcileResources(ctx, mon)
 	if err != nil {
-		return ctrl.Result{}, err
+		// Error reconciling uptrends sub-resources - requeue the request.
+		return reconcile.Result{}, err
 	}
 
 	return reconcile.Result{}, nil
 }
 
-func (m *monitorReconcile) reconcileResource(ctx context.Context, mon *v1alpha1.Uptrends) error {
-	auth := context.WithValue(context.Background(), sw.ContextBasicAuth, sw.BasicAuth{
+func (m *monitorReconcile) reconcileResources(ctx context.Context, uptrends *v1alpha1.Uptrends) error {
+	err := m.reconcileStatus(ctx, uptrends)
+	if err != nil {
+		return err
+	}
+
+	err = m.reconcileMonitor(ctx, uptrends)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *monitorReconcile) reconcileDelete(ctx context.Context, mon *v1alpha1.Uptrends) error {
+	auth := context.WithValue(ctx, sw.ContextBasicAuth, sw.BasicAuth{
+		UserName: m.creds.Username,
+		Password: m.creds.Password,
+	})
+
+	client := sw.NewAPIClient(sw.NewConfiguration())
+
+	_, err := client.MonitorApi.MonitorDeleteMonitor(auth, mon.Status.MonitorGuid)
+	if err != nil {
+		return err
+	}
+
+	mon.SetFinalizers(finalizers.RemoveFinalizer(mon, v1alpha1.FinalizerName))
+	err = m.Update(ctx, mon)
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+
+	return nil
+}
+
+func (m *monitorReconcile) reconcileStatus(ctx context.Context, uptrends *v1alpha1.Uptrends) error {
+	phase := v1alpha1.UptrendsPhaseNone
+
+	if uptrends.Status.MonitorGuid != "" {
+		phase = v1alpha1.UptrendsPhaseRunning
+	}
+
+	if uptrends.Status.Phase != phase {
+		uptrends.Status.Phase = phase
+
+		return m.Status().Update(ctx, uptrends)
+	}
+
+	return nil
+}
+
+func (m *monitorReconcile) reconcileMonitor(ctx context.Context, mon *v1alpha1.Uptrends) error {
+	if mon.Status.Phase == v1alpha1.UptrendsPhaseRunning {
+		return nil
+	}
+
+	auth := context.WithValue(ctx, sw.ContextBasicAuth, sw.BasicAuth{
 		UserName: m.creds.Username,
 		Password: m.creds.Password,
 	})
@@ -80,11 +148,23 @@ func (m *monitorReconcile) reconcileResource(ctx context.Context, mon *v1alpha1.
 		CheckInterval: int32(mon.Spec.Interval),
 	}
 
-	_, _, err := client.MonitorApi.MonitorPostMonitor(
+	up, _, err := client.MonitorApi.MonitorPostMonitor(
 		auth, &sw.MonitorApiMonitorPostMonitorOpts{
 			Monitor: optional.NewInterface(new),
 		},
 	)
+	if err != nil {
+		return err
+	}
+
+	mon.SetFinalizers(finalizers.AddFinalizer(mon, v1alpha1.FinalizerName))
+	err = m.Update(ctx, mon)
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+
+	mon.Status.MonitorGuid = up.MonitorGuid
+	err = m.Status().Update(ctx, mon)
 	if err != nil {
 		return err
 	}
