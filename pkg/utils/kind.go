@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -318,9 +319,44 @@ func CreateOrUpdateContainer(containers []corev1.Container, name string, updateF
 		})
 		c = &res[len(res)-1]
 	}
+
 	if err := updateFn(c); err != nil {
 		return nil, err
 	}
+
+	return res, nil
+}
+
+// FindMonitor finds a monitor by name.
+func FindMonitor(monitors []v1alpha1.Uptrends, name string) (*v1alpha1.Uptrends, bool) {
+	for i := 0; i < len(monitors); i++ {
+		monitor := &monitors[i]
+		if monitor.Name == name {
+			return monitor, true
+		}
+	}
+	return nil, false
+}
+
+// CreateOrUpdateMonitor creates or updates a monitor for the given object.
+func CreateOrUpdateMonitor(monitors []v1alpha1.Uptrends, name string, updateFn func(m *v1alpha1.Uptrends) error) ([]v1alpha1.Uptrends, error) {
+	res := make([]v1alpha1.Uptrends, len(monitors))
+	copy(res, monitors)
+
+	m, found := FindMonitor(res, name)
+	if !found {
+		res = append(res, v1alpha1.Uptrends{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: name,
+			},
+		})
+		m = &res[len(res)-1]
+	}
+
+	if err := updateFn(m); err != nil {
+		return nil, err
+	}
+
 	return res, nil
 }
 
