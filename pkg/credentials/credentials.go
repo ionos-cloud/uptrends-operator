@@ -1,0 +1,9 @@
+package credentials
+
+// API ...
+type API struct {
+	// Username ...
+	Username string
+	// Password ...
+	Password string
+}

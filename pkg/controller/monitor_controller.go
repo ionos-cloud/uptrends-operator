@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
+	"github.com/ionos-cloud/uptrends-operator/pkg/credentials"
 
 	"github.com/antihax/optional"
 	sw "github.com/ionos-cloud/uptrends-go"
@@ -19,18 +20,20 @@ import (
 )
 
 // NewMonitorController ...
-func NewMonitorController(mgr manager.Manager) error {
+func NewMonitorController(mgr manager.Manager, creds *credentials.API) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Uptrends{}).
 		Watches(source.NewKindWithCache(&v1alpha1.Uptrends{}, mgr.GetCache()), &handler.EnqueueRequestForObject{}).
 		Complete(&monitorReconcile{
 			Client: mgr.GetClient(),
 			scheme: mgr.GetScheme(),
+			creds:  creds,
 		})
 }
 
 type monitorReconcile struct {
 	client.Client
+	creds  *credentials.API
 	scheme *runtime.Scheme
 }
 
@@ -63,8 +66,8 @@ func (m *monitorReconcile) Reconcile(ctx context.Context, r reconcile.Request) (
 
 func (m *monitorReconcile) reconcileResource(ctx context.Context, mon *v1alpha1.Uptrends) error {
 	auth := context.WithValue(context.Background(), sw.ContextBasicAuth, sw.BasicAuth{
-		UserName: "",
-		Password: "",
+		UserName: m.creds.Username,
+		Password: m.creds.Password,
 	})
 
 	client := sw.NewAPIClient(sw.NewConfiguration())

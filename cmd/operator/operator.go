@@ -6,27 +6,33 @@ import (
 
 	goruntime "runtime"
 
+	"github.com/ionos-cloud/uptrends-operator/pkg/controller"
+	"github.com/ionos-cloud/uptrends-operator/pkg/credentials"
+	"github.com/ionos-cloud/uptrends-operator/pkg/utils"
+
+	api "github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
 	"github.com/spf13/cobra"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
+	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-
-	api "github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
-	"github.com/ionos-cloud/uptrends-operator/pkg/controller"
-	"github.com/ionos-cloud/uptrends-operator/pkg/utils"
 	//+kubebuilder:scaffold:imports
 )
 
 type flags struct {
-	enableLeaderElection bool
-	metricsAddr          string
-	probeAddr            string
+	EnableLeaderElection bool
+	KubeConfig           string
+	MasterURL            string
+	MetricsAddr          string
+	ProbeAddr            string
+	APIUsername          string
+	APIPassword          string
 }
 
 var f = &flags{}
@@ -37,7 +43,7 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use: "operator",
+	Use: "controller",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return run(cmd.Context())
 	},
@@ -49,9 +55,12 @@ func printVersion() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVar(&f.enableLeaderElection, "leader-elect", f.enableLeaderElection, "only one controller")
-	rootCmd.Flags().StringVar(&f.metricsAddr, "metrics-bind-address", ":8080", "metrics endpoint")
-	rootCmd.Flags().StringVar(&f.probeAddr, "health-probe-bind-address", ":8081", "health probe")
+	rootCmd.Flags().BoolVar(&f.EnableLeaderElection, "leader-elect", f.EnableLeaderElection, "Ensure that there is only one controller manager running")
+	rootCmd.Flags().StringVar(&f.KubeConfig, "kubeconfig", f.KubeConfig, "Path to a kubeconfig. Only required if out-of-cluster.")
+	rootCmd.Flags().StringVar(&f.MasterURL, "master", f.MasterURL, "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	rootCmd.Flags().StringVar(&f.MetricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+	rootCmd.Flags().StringVar(&f.APIUsername, "api-username", "", "The API username for uptrends.")
+	rootCmd.Flags().StringVar(&f.APIPassword, "api-password", "", "The API password for uptrends.")
 
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
@@ -62,7 +71,7 @@ func init() {
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		setupLog.Error(err, "unable to run operator")
+		klog.Error(err, "unable to run controller")
 	}
 }
 
@@ -76,16 +85,16 @@ func run(ctx context.Context) error {
 	printVersion()
 
 	options := manager.Options{
-		Namespace:                  "",
-		Scheme:                     scheme,
-		MetricsBindAddress:         f.metricsAddr,
-		Port:                       9443,
-		HealthProbeBindAddress:     f.probeAddr,
-		LeaderElection:             f.enableLeaderElection,
-		LeaderElectionResourceLock: resourcelock.LeasesResourceLock,
-		LeaderElectionID:           "j8yhqdnj.octopinger.io",
-		NewClient:                  utils.DefaultNewClientWithMetrics,
 		BaseContext:                func() context.Context { return ctx },
+		HealthProbeBindAddress:     f.ProbeAddr,
+		LeaderElection:             f.EnableLeaderElection,
+		LeaderElectionID:           "j8yhqdnj.uptrends.ionos-cloud.github.io",
+		LeaderElectionResourceLock: resourcelock.LeasesResourceLock,
+		MetricsBindAddress:         f.MetricsAddr,
+		Namespace:                  "",
+		NewClient:                  utils.DefaultNewClientWithMetrics,
+		Port:                       9443,
+		Scheme:                     scheme,
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
@@ -118,7 +127,17 @@ func run(ctx context.Context) error {
 }
 
 func setupControllers(f *flags, mgr ctrl.Manager) error {
-	err := controller.NewIngressReconciler(mgr)
+	err := controller.NewIngressController(mgr)
+	if err != nil {
+		return err
+	}
+
+	creds := &credentials.API{
+		Username: f.APIUsername,
+		Password: f.APIPassword,
+	}
+
+	err = controller.NewMonitorController(mgr, creds)
 	if err != nil {
 		return err
 	}
