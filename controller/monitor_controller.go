@@ -63,8 +63,8 @@ func (m *monitorReconcile) Reconcile(ctx context.Context, r reconcile.Request) (
 
 func (m *monitorReconcile) reconcileResource(ctx context.Context, mon *v1alpha1.Uptrends) error {
 	auth := context.WithValue(context.Background(), sw.ContextBasicAuth, sw.BasicAuth{
-		UserName: "337c79e018af4e1bbd2bce89990729c7",
-		Password: "L4LDSRiQnMVni3ol4kvV1cTL5woT3Wl9",
+		UserName: "",
+		Password: "",
 	})
 
 	client := sw.NewAPIClient(sw.NewConfiguration())
