@@ -24,8 +24,7 @@ func init() {
 // +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
 // +operator-sdk:csv:customresourcedefinitions:resources={{Uptrends,v1alpha1,""}}
-// +operator-sdk:csv:customresourcedefinitions:resources={{Pod,v1,""}}
-// +operator-sdk:csv:customresourcedefinitions:resources={{ReplicaSet,v1,""}}
+// +operator-sdk:csv:customresourcedefinitions:resources={{Ingress,v1,""}}
 type Uptrends struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

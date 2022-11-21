@@ -7,6 +7,7 @@ import (
 	goruntime "runtime"
 
 	"github.com/spf13/cobra"
+	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -16,7 +17,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	api "github.com/ionos-cloud/octopinger/api/v1alpha1"
+	api "github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
 	"github.com/ionos-cloud/uptrends-operator/pkg/controller"
 	"github.com/ionos-cloud/uptrends-operator/pkg/utils"
 	//+kubebuilder:scaffold:imports
@@ -54,6 +55,7 @@ func init() {
 
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
+	utilruntime.Must(networkingv1.AddToScheme(scheme))
 	utilruntime.Must(api.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }

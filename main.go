@@ -9,8 +9,12 @@ import (
 	"github.com/ionos-cloud/uptrends-operator/controller"
 	"github.com/ionos-cloud/uptrends-operator/pkg/utils"
 
+	api "github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
 	"github.com/spf13/cobra"
+	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -21,11 +25,11 @@ import (
 )
 
 type flags struct {
+	EnableLeaderElection bool
 	KubeConfig           string
 	MasterURL            string
 	MetricsAddr          string
 	ProbeAddr            string
-	EnableLeaderElection bool
 }
 
 var f = &flags{}
@@ -48,10 +52,16 @@ func printVersion() {
 }
 
 func init() {
-	rootCmd.Flags().BoolVar(&f.EnableLeaderElection, "leader-elect", f.EnableLeaderElection, "only one controller")
+	rootCmd.Flags().BoolVar(&f.EnableLeaderElection, "leader-elect", f.EnableLeaderElection, "Ensure that there is only one controller manager running")
 	rootCmd.Flags().StringVar(&f.KubeConfig, "kubeconfig", f.KubeConfig, "Path to a kubeconfig. Only required if out-of-cluster.")
 	rootCmd.Flags().StringVar(&f.MasterURL, "master", f.MasterURL, "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	rootCmd.Flags().StringVar(&f.MetricsAddr, "metrics-bind-address", ":8080", "metrics endpoint")
+	rootCmd.Flags().StringVar(&f.MetricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
+
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+
+	utilruntime.Must(networkingv1.AddToScheme(scheme))
+	utilruntime.Must(api.AddToScheme(scheme))
+	//+kubebuilder:scaffold:scheme
 }
 
 func main() {

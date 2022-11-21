@@ -19,9 +19,7 @@ import (
 func NewIngressController(mgr manager.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&networkingv1.Ingress{}).
-		Watches(
-			source.NewKindWithCache(&networkingv1.Ingress{}, mgr.GetCache()),
-			&handler.EnqueueRequestForObject{}).
+		Watches(&source.Kind{Type: &networkingv1.Ingress{}}, &handler.EnqueueRequestForObject{}).
 		Complete(&ingressReconciler{
 			Client: mgr.GetClient(),
 			scheme: mgr.GetScheme(),
