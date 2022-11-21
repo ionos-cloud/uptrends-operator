@@ -673,10 +673,8 @@ github.com/imdario/mergo v0.3.12/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/inconshreveable/mousetrap v1.0.1 h1:U3uMjPSQEBMNp1lFxmllqCPM6P5u/Xq7Pgzkat/bFNc=
 github.com/inconshreveable/mousetrap v1.0.1/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
-github.com/ionos-cloud/octopinger v0.1.7 h1:pZZQJpfI5v2k3XfASgQTUw3ZVxPqh4K56mvgQ6o8IJI=
-github.com/ionos-cloud/octopinger v0.1.7/go.mod h1:I9i2pSHwDhttrERKHpc4MTBCpsYFwG/UWmdk31OzGHM=
-github.com/ionos-cloud/uptrends-go v0.0.0-20221116202953-09a59725448b h1:Dl7AnEqMBmUDxIO3uLwBy6L4C8dc+1nK7aDAYE9jjVA=
-github.com/ionos-cloud/uptrends-go v0.0.0-20221116202953-09a59725448b/go.mod h1:8ksdMG35515IJ7grvkxNWLauwN9/mm4tpXjlVJ3QH3o=
+github.com/ionos-cloud/uptrends-go v0.0.0-20221119194631-e75f6a308bc7 h1:hsT2kveIODD2rbDHvIoBCLQ0/xWDoVIkRZrzvLHrlhg=
+github.com/ionos-cloud/uptrends-go v0.0.0-20221119194631-e75f6a308bc7/go.mod h1:nDE2WF7986H2iW9HwsujpT5WrLjTQXe5AdKKh0x23Wk=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jgautheron/goconst v1.5.1 h1:HxVbL1MhydKs8R8n/HE5NPvzfaYmQJA3o879lE4+WcM=
 github.com/jgautheron/goconst v1.5.1/go.mod h1:aAosetZ5zaeC/2EfMeRswtxUFBpe2Hr7HzkgX4fanO4=

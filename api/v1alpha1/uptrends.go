@@ -9,6 +9,8 @@ const (
 	CRDResourceKind = "Uptrends"
 	// AnnotationPrefix ...
 	AnnotationPrefix = "uptrends.ionos-cloud.github.io/monitor."
+	// FinalizerName ...
+	FinalizerName = "uptrends.ionos-cloud.github.io/finalizer"
 )
 
 func init() {

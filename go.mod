@@ -3,12 +3,12 @@ module github.com/ionos-cloud/uptrends-operator
 go 1.19
 
 require (
+	github.com/antihax/optional v1.0.0
 	github.com/go-logr/logr v1.2.3
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.43.0
 	github.com/helm/chart-releaser v1.4.1
-	github.com/ionos-cloud/octopinger v0.1.7
-	github.com/ionos-cloud/uptrends-go v0.0.0-20221116202953-09a59725448b
+	github.com/ionos-cloud/uptrends-go v0.0.0-20221119194631-e75f6a308bc7
 	github.com/prometheus/client_golang v1.12.2
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
@@ -39,7 +39,6 @@ require (
 	github.com/OpenPeeDeeP/depguard v1.0.1 // indirect
 	github.com/Songmu/retry v0.1.0 // indirect
 	github.com/alexkohler/prealloc v1.0.0 // indirect
-	github.com/antihax/optional v1.0.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d // indirect
 	github.com/ashanbrown/forbidigo v1.2.0 // indirect
 	github.com/ashanbrown/makezero v0.0.0-20210520155254-b6261585ddde // indirect
