@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    uses: ./.github/workflows/main.yml
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [ test ]
+    permissions:
+      packages: write
+      contents: write
+    steps:
+    - uses: actions/checkout@v3
+    - run: |
+        git config user.name "$GITHUB_ACTOR"
+        git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+    - run: |
+        echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+    - name: Install Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: v3.10.0
+    - uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - uses: goreleaser/goreleaser-action@v3
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        version: latest
+        args: release
+      if: success()
+    - run: |
+          go run cmd/updater/updater.go --file charts/octopinger/Chart.yaml --version ${{ env.RELEASE_VERSION }}
+    - uses: helm/chart-releaser-action@v1.4.1
+      env:
+        CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      with:
+        charts_dir: charts
+        config: ${{ github.workspace }}/.cr.yaml
+    - uses: Co-qn/google-chat-notification@releases/v1
+      with:
+        name: Octopinger ${{ env.RELEASE_VERSION }}
+        url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+        status: ${{ job.status }}
+      if: always()
