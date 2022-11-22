@@ -62,18 +62,27 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 	// Delete if timestamp is set
 	if !in.ObjectMeta.DeletionTimestamp.IsZero() {
 		if finalizers.HasFinalizer(in, v1alpha1.FinalizerName) {
-			c.delete(ctx, in)
+			c.reconcileDelete(ctx, in)
 		}
 
-		// Delete
+		// Delete success
 		return ctrl.Result{}, nil
 	}
 
-	items := make(map[string]string)
+	err = c.reconcileResources(ctx, in)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	return reconcile.Result{}, nil
+}
+
+func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networkingv1.Ingress) error {
+	annotations := make(map[string]string)
 
 	for k, v := range in.Annotations {
 		if strings.HasPrefix(k, v1alpha1.AnnotationPrefix) {
-			items[strings.TrimPrefix(k, v1alpha1.AnnotationPrefix)] = v
+			annotations[strings.TrimPrefix(k, v1alpha1.AnnotationPrefix)] = v
 		}
 	}
 
@@ -98,11 +107,11 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 			},
 		}
 
-		if v, ok := items["type"]; ok {
+		if v, ok := annotations["type"]; ok {
 			monitor.Spec.Type = v
 		}
 
-		if v, ok := items["interval"]; ok {
+		if v, ok := annotations["interval"]; ok {
 			if i, err := strconv.Atoi(v); err == nil {
 				monitor.Spec.Interval = i
 			}
@@ -127,7 +136,7 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 				existingMonitor = monitor
 				err := c.Update(ctx, existingMonitor)
 				if err != nil {
-					return reconcile.Result{}, err
+					return err
 				}
 			}
 
@@ -136,20 +145,20 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 
 		err := c.Create(ctx, monitor)
 		if err != nil {
-			return reconcile.Result{}, err
+			return err
 		}
 	}
 
 	in.SetFinalizers(finalizers.AddFinalizer(in, v1alpha1.FinalizerName))
-	err = c.Update(ctx, in)
+	err := c.Update(ctx, in)
 	if err != nil && !errors.IsNotFound(err) {
-		return reconcile.Result{}, err
+		return err
 	}
 
-	return reconcile.Result{}, nil
+	return nil
 }
 
-func (c *ingressReconciler) delete(ctx context.Context, in *networkingv1.Ingress) (reconcile.Result, error) {
+func (c *ingressReconciler) reconcileDelete(ctx context.Context, in *networkingv1.Ingress) (reconcile.Result, error) {
 	items := make(map[string]string)
 
 	for k, v := range in.Annotations {
