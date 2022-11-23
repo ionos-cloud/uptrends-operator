@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
 	"github.com/ionos-cloud/uptrends-operator/pkg/credentials"
@@ -101,8 +102,8 @@ func (m *monitorReconcile) reconcileDelete(ctx context.Context, mon *v1alpha1.Up
 
 	client := sw.NewAPIClient(sw.NewConfiguration())
 
-	_, err := client.MonitorApi.MonitorDeleteMonitor(auth, mon.Status.MonitorGuid)
-	if err != nil {
+	resp, err := client.MonitorApi.MonitorDeleteMonitor(auth, mon.Status.MonitorGuid)
+	if err != nil && resp.StatusCode != http.StatusNotFound { // assume that this was already deleted
 		return err
 	}
 

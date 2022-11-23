@@ -78,6 +78,17 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 }
 
 func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networkingv1.Ingress) error {
+	existingMonitors := &v1alpha1.UptrendsList{}
+	err := c.List(ctx, existingMonitors, client.InNamespace(in.Namespace))
+	if err != nil {
+		return err
+	}
+
+	existingNames := make(map[string]v1alpha1.Uptrends)
+	for _, m := range existingMonitors.Items {
+		existingNames[m.Name] = m
+	}
+
 	annotations := make(map[string]string)
 
 	for k, v := range in.Annotations {
@@ -95,10 +106,13 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 			continue
 		}
 
+		name := fmt.Sprintf("%s-%s", r.Host, in.Name)
+		delete(existingNames, name)
+
 		monitor := &v1alpha1.Uptrends{
 			ObjectMeta: metav1.ObjectMeta{
 				Namespace: in.Namespace,
-				Name:      r.Host,
+				Name:      name,
 			},
 			Spec: v1alpha1.UptrendsSpec{
 				Name:     fmt.Sprintf("%s - Uptime", r.Host),
@@ -126,7 +140,7 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 		}
 
 		existingMonitor := &v1alpha1.Uptrends{}
-		if utils.IsObjectFound(ctx, c, in.Namespace, r.Host, existingMonitor) {
+		if utils.IsObjectFound(ctx, c, in.Namespace, name, existingMonitor) {
 			// this is not DaemonSet is not owned by Octopinger
 			if ownerRef := metav1.GetControllerOf(existingMonitor); ownerRef == nil || ownerRef.Kind != v1alpha1.CRDResourceKind {
 				continue
@@ -149,8 +163,18 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 		}
 	}
 
+	// clean up
+	if len(existingNames) > 0 {
+		for _, v := range existingNames {
+			err := c.Delete(ctx, &v)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	in.SetFinalizers(finalizers.AddFinalizer(in, v1alpha1.FinalizerName))
-	err := c.Update(ctx, in)
+	err = c.Update(ctx, in)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	}
@@ -176,8 +200,10 @@ func (c *ingressReconciler) reconcileDelete(ctx context.Context, in *networkingv
 			continue
 		}
 
+		name := fmt.Sprintf("%s-%s", r.Host, in.Name)
+
 		m := &v1alpha1.Uptrends{}
-		err := c.Get(ctx, types.NamespacedName{Namespace: in.Namespace, Name: r.Host}, m)
+		err := c.Get(ctx, types.NamespacedName{Namespace: in.Namespace, Name: name}, m)
 		if err != nil && errors.IsNotFound(err) {
 			continue
 		}
