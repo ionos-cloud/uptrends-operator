@@ -62,7 +62,7 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 	// Delete if timestamp is set
 	if !in.ObjectMeta.DeletionTimestamp.IsZero() {
 		if finalizers.HasFinalizer(in, v1alpha1.FinalizerName) {
-			c.reconcileDelete(ctx, in)
+			return c.reconcileDelete(ctx, in)
 		}
 
 		// Delete success

@@ -60,7 +60,10 @@ func (m *monitorReconcile) Reconcile(ctx context.Context, r reconcile.Request) (
 	// Delete if timestamp is set
 	if !mon.ObjectMeta.DeletionTimestamp.IsZero() {
 		if finalizers.HasFinalizer(mon, v1alpha1.FinalizerName) {
-			m.reconcileDelete(ctx, mon)
+			err := m.reconcileDelete(ctx, mon)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 
 		// Delete
