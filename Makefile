@@ -14,7 +14,7 @@ IMG ?= $(IMAGE_TAG_BASE):v$(VERSION)
 
 generate:
 	@go generate ./...
-	@go run cmd/manifest/manifest.go --file manifests/crd/bases/uptrends.ionos-cloud.github.io_uptrends.yaml \
+	@go run cmd/manifest/manifest.go --file manifests/crd/bases/operators.ionos-cloud.github.io_uptrends.yaml \
 		--file manifests/install/service_account.yaml \
 		--file manifests/install/cluster_role.yaml \
 		--file manifests/install/cluster_role_binding.yaml \

@@ -7,9 +7,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.6.1
   creationTimestamp: null
-  name: uptrends.uptrends.ionos-cloud.github.io
+  name: uptrends.operators.ionos-cloud.github.io
 spec:
-  group: uptrends.ionos-cloud.github.io
+  group: operators.ionos-cloud.github.io
   names:
     kind: Uptrends
     listKind: UptrendsList

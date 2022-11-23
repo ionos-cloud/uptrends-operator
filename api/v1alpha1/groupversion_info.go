@@ -1,6 +1,6 @@
-// Package v1alpha1 contains API Schema definitions for the uptrends.ionos-cloud.github.io v1alpha1 API group
+// Package v1alpha1 contains API Schema definitions for the uptrends.operators.ionos-cloud.github.io v1alpha1 API group
 // +kubebuilder:object:generate=true
-// +groupName=uptrends.ionos-cloud.github.io
+// +groupName=operators.ionos-cloud.github.io
 package v1alpha1
 
 import (
@@ -10,7 +10,7 @@ import (
 
 var (
 	// GroupVersion is group version used to register these objects
-	GroupVersion = schema.GroupVersion{Group: "uptrends.ionos-cloud.github.io", Version: "v1alpha1"}
+	GroupVersion = schema.GroupVersion{Group: "operators.ionos-cloud.github.io", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}
