@@ -2,6 +2,27 @@ apiVersion: v1
 entries:
   uptrends:
   - apiVersion: v2
+    appVersion: v0.0.1
+    created: "2022-11-23T12:33:09.843040045Z"
+    description: A Helm chart for the uptrends operator, a declarative, Kubernetes
+      Operator to monitor the connectivity of your cluster.
+    digest: 1b61406a7e36aff7222047ccf0267e0ae0112c1ed6bf064d549b73892850e04e
+    home: https://github.com/ionos-cloud/uptrends-operator
+    keywords:
+    - uptrends
+    - observability
+    kubeVersion: '>=1.22.0-0'
+    maintainers:
+    - name: Sebastian Doell
+      url: https://github.com/katallaxie
+    name: uptrends
+    sources:
+    - https://github.com/ionos-cloud/uptrends-operator/tree/main/charts/uptrends
+    - https://github.com/ionos-cloud/uptrends-operator
+    urls:
+    - https://github.com/ionos-cloud/uptrends-operator/releases/download/uptrends-chart-0.0.1/uptrends-0.0.1.tgz
+    version: 0.0.1
+  - apiVersion: v2
     appVersion: v0.0.1-beta.5
     created: "2022-11-23T09:23:16.115819281Z"
     description: A Helm chart for the uptrends operator, a declarative, Kubernetes
@@ -22,4 +43,4 @@ entries:
     urls:
     - https://github.com/ionos-cloud/uptrends-operator/releases/download/uptrends-chart-0.0.1-beta.5/uptrends-0.0.1-beta.5.tgz
     version: 0.0.1-beta.5
-generated: "2022-11-23T09:23:16.115833281Z"
+generated: "2022-11-23T12:33:09.843054846Z"
