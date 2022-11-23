@@ -39,6 +39,12 @@ helm install uptrends uptrends/uptrends --create-namespace --namespace uptrends 
 
 The required `API_USERNAME` and `API_PASSWORD` can be securely configured via `envFrom` in the `values.yaml`.
 
+## Examples
+
+[/examples](/examples/) contains the example of an `Ingress` and `Uptrends` based monitor.
+
+> Renaming the ingress does not delete monitors.
+
 ## License
 
 [Apache 2.0](/LICENSE)
