@@ -1,0 +1,10 @@
+apiVersion: operators.ionos-cloud.github.io/v1alpha1
+kind: Uptrends
+metadata:
+  name: demo
+spec:
+  url: https://ionos.cloud
+  interval: 1
+  description: ionos.cloud
+  name: ionos.cloud - uptime
+  type: HTTPS

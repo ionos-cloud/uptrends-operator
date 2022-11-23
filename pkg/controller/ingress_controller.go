@@ -141,13 +141,9 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 
 		existingMonitor := &v1alpha1.Uptrends{}
 		if utils.IsObjectFound(ctx, c, in.Namespace, name, existingMonitor) {
-			// this is not DaemonSet is not owned by Octopinger
-			if ownerRef := metav1.GetControllerOf(existingMonitor); ownerRef == nil || ownerRef.Kind != v1alpha1.CRDResourceKind {
-				continue
-			}
-
 			if !reflect.DeepEqual(existingMonitor, monitor) {
-				existingMonitor = monitor
+				existingMonitor.Spec = monitor.Spec
+
 				err := c.Update(ctx, existingMonitor)
 				if err != nil {
 					return err

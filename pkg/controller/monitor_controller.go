@@ -132,11 +132,38 @@ func (m *monitorReconcile) reconcileStatus(ctx context.Context, uptrends *v1alph
 	return nil
 }
 
-func (m *monitorReconcile) reconcileMonitor(ctx context.Context, mon *v1alpha1.Uptrends) error {
-	if mon.Status.Phase == v1alpha1.UptrendsPhaseRunning {
-		return nil
+func (m *monitorReconcile) reconcileUpdate(ctx context.Context, mon *v1alpha1.Uptrends) error {
+	auth := context.WithValue(ctx, sw.ContextBasicAuth, sw.BasicAuth{
+		UserName: m.creds.Username,
+		Password: m.creds.Password,
+	})
+
+	client := sw.NewAPIClient(sw.NewConfiguration())
+
+	update := sw.Monitor{
+		Name:          mon.Spec.Name,
+		Url:           mon.Spec.Url,
+		MonitorType:   utils.PtrMonitor(sw.MonitorType(mon.Spec.Type)),
+		Notes:         mon.Spec.Description,
+		CheckInterval: int32(mon.Spec.Interval),
 	}
 
+	_, err := client.MonitorApi.MonitorPatchMonitor(
+		auth,
+		mon.Status.MonitorGuid,
+		&sw.MonitorApiMonitorPatchMonitorOpts{
+			Monitor: optional.NewInterface(update),
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *monitorReconcile) reconcileCreate(ctx context.Context, mon *v1alpha1.Uptrends) error {
 	auth := context.WithValue(ctx, sw.ContextBasicAuth, sw.BasicAuth{
 		UserName: m.creds.Username,
 		Password: m.creds.Password,
@@ -174,4 +201,12 @@ func (m *monitorReconcile) reconcileMonitor(ctx context.Context, mon *v1alpha1.U
 	}
 
 	return nil
+}
+
+func (m *monitorReconcile) reconcileMonitor(ctx context.Context, mon *v1alpha1.Uptrends) error {
+	if mon.Status.Phase == v1alpha1.UptrendsPhaseRunning {
+		return m.reconcileUpdate(ctx, mon)
+	}
+
+	return m.reconcileCreate(ctx, mon)
 }
