@@ -31,6 +31,12 @@ helm repo add uptrends https://ionos-cloud.github.io/uptrends-operator/
 helm repo update
 ```
 
+The most recent version is installed via.
+
+```bash
+helm install uptrends uptrends/uptrends --create-namespace --namespace uptrends --version v0.0.1-beta.
+```
+
 The required `API_USERNAME` and `API_PASSWORD` can be securely configured via `envFrom` in the `values.yaml`.
 
 ## License
