@@ -4,7 +4,7 @@ builds:
   -
     id: operator
     binary: operator-{{.Os}}-{{.Arch}}
-    main: cmd/operator/main.go
+    main: cmd/operator/operator.go
     goos:
       - linux
     goarch:
