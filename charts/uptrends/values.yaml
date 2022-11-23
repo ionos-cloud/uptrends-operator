@@ -1,5 +1,5 @@
 ## uptrends configuration
-## Ref: https://github.com/ionos-cloud/uptrends
+## Ref: https://github.com/ionos-cloud/uptrends-operator
 ##
 
 # -- Provide a name in place of `uptrends`
@@ -27,7 +27,7 @@ global:
   # Default image used by all components
   image:
     # -- If defined, a repository applied to all uptrends deployments
-    repository: ghcr.io/ionos-cloud/uptrends/operator
+    repository: ghcr.io/ionos-cloud/uptrends-operator/operator
     # -- Overrides the global uptrends image tag whose default is the chart appVersion
     tag: ""
     # -- If defined, a imagePullPolicy applied to all uptrends deployments

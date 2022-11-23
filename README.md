@@ -10,6 +10,16 @@ This operator helps to configure [uptrends](https://www.uptrends.com/) monitorin
 
 The operator is based on the [uptrends](https://github.com/ionos-cloud/uptrends-go) package. It is a Kubernetes operator that watches for Ingress resources and creates uptrends checks for them. It also watches for changes in the Ingress resources and updates the uptrends checks accordingly.
 
+## Environment
+
+### `API_USERNAME` 
+
+This configures the required username for the uptrends API access. See the [uptrends](https://www.uptrends.com/support/kb/api) documentation for more information.
+
+### `API_PASSWORD` 
+
+This configures the required password for the uptrends API access. See the [uptrends](https://www.uptrends.com/support/kb/api) documentation for more information.
+
 ## Helm
 
 [Helm](https://helm.sh/) can be used to install :chart_with_upwards_trend: uptrends Operator.
@@ -18,6 +28,8 @@ The operator is based on the [uptrends](https://github.com/ionos-cloud/uptrends-
 helm repo add uptrends https://ionos-cloud.github.io/uptrends-operator/
 helm repo update
 ```
+
+The required `API_USERNAME` and `API_PASSWORD` can be securely configured via `envFrom` in the `values.yaml`.
 
 ## License
 

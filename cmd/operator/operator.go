@@ -10,6 +10,7 @@ import (
 	"github.com/ionos-cloud/uptrends-operator/pkg/credentials"
 	"github.com/ionos-cloud/uptrends-operator/pkg/utils"
 
+	"github.com/caarlos0/env/v6"
 	api "github.com/ionos-cloud/uptrends-operator/api/v1alpha1"
 	"github.com/spf13/cobra"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -29,10 +30,10 @@ type flags struct {
 	EnableLeaderElection bool
 	KubeConfig           string
 	MasterURL            string
-	MetricsAddr          string
-	ProbeAddr            string
-	APIUsername          string
-	APIPassword          string
+	MetricsAddr          string `env:"PROBE_ADDR" envDefault:":8080"`
+	ProbeAddr            string `env:"PROBE_ADDR" envDefault:":8081"`
+	APIUsername          string `env:"API_USERNAME"`
+	APIPassword          string `env:"API_PASSWORD"`
 }
 
 var f = &flags{}
@@ -55,12 +56,18 @@ func printVersion() {
 }
 
 func init() {
+	err := env.Parse(f)
+	if err != nil {
+		panic(err)
+	}
+
 	rootCmd.Flags().BoolVar(&f.EnableLeaderElection, "leader-elect", f.EnableLeaderElection, "Ensure that there is only one controller manager running")
 	rootCmd.Flags().StringVar(&f.KubeConfig, "kubeconfig", f.KubeConfig, "Path to a kubeconfig. Only required if out-of-cluster.")
 	rootCmd.Flags().StringVar(&f.MasterURL, "master", f.MasterURL, "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	rootCmd.Flags().StringVar(&f.MetricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
-	rootCmd.Flags().StringVar(&f.APIUsername, "api-username", "", "The API username for uptrends.")
-	rootCmd.Flags().StringVar(&f.APIPassword, "api-password", "", "The API password for uptrends.")
+	rootCmd.Flags().StringVar(&f.MetricsAddr, "metrics-bind-address", f.MetricsAddr, "The address the metric endpoint binds to.")
+	rootCmd.Flags().StringVar(&f.ProbeAddr, "health-probe-bind-address", f.ProbeAddr, "health probe")
+	rootCmd.Flags().StringVar(&f.APIUsername, "api-username", f.APIUsername, "The API username for uptrends.")
+	rootCmd.Flags().StringVar(&f.APIPassword, "api-password", f.APIPassword, "The API password for uptrends.")
 
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
