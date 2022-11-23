@@ -51,7 +51,7 @@ jobs:
         config: ${{ github.workspace }}/.cr.yaml
     - uses: Co-qn/google-chat-notification@releases/v1
       with:
-        name: Octopinger ${{ env.RELEASE_VERSION }}
+        name: Uptrends Operator ${{ env.RELEASE_VERSION }}
         url: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
         status: ${{ job.status }}
       if: always()
