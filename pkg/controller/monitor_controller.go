@@ -160,6 +160,35 @@ func (m *monitorReconcile) reconcileUpdate(ctx context.Context, mon *v1alpha1.Up
 		return err
 	}
 
+	groups, _, err := client.MonitorApi.MonitorGetMonitorGroups(
+		auth,
+		mon.Status.MonitorGuid,
+	)
+	if err != nil {
+		return err
+	}
+
+	gg := make(map[string]bool)
+	for _, g := range groups {
+		gg[g] = true
+	}
+
+	if mon.Spec.Group.GUID == "" { // remove from all groups
+		for k := range gg {
+			res, err := client.MonitorGroupApi.MonitorGroupRemoveMonitorFromMonitorGroup(auth, k, mon.Status.MonitorGuid)
+			if err != nil && res.StatusCode != http.StatusBadRequest { // remove
+				return err
+			}
+		}
+	}
+
+	if _, ok := gg[mon.Spec.Group.GUID]; !ok && mon.Spec.Group.GUID != "" { // this
+		_, err := client.MonitorGroupApi.MonitorGroupAddMonitorToMonitorGroup(auth, mon.Spec.Group.GUID, mon.Status.MonitorGuid)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -186,6 +215,13 @@ func (m *monitorReconcile) reconcileCreate(ctx context.Context, mon *v1alpha1.Up
 	)
 	if err != nil {
 		return err
+	}
+
+	if mon.Spec.Group.GUID != "" {
+		_, err := client.MonitorGroupApi.MonitorGroupAddMonitorToMonitorGroup(auth, mon.Spec.Group.GUID, up.MonitorGuid)
+		if err != nil {
+			return err
+		}
 	}
 
 	mon.SetFinalizers(finalizers.AddFinalizer(mon, v1alpha1.FinalizerName))

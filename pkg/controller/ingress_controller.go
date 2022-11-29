@@ -118,6 +118,7 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 				Name:     fmt.Sprintf("%s - Uptime", r.Host),
 				Interval: 5,
 				Type:     "HTTPS",
+				Group:    v1alpha1.MonitorGroup{},
 			},
 		}
 
@@ -129,6 +130,10 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 			if i, err := strconv.Atoi(v); err == nil {
 				monitor.Spec.Interval = i
 			}
+		}
+
+		if v, ok := annotations["guid"]; ok {
+			monitor.Spec.Group.GUID = v
 		}
 
 		if monitor.Spec.Type == "HTTPS" {

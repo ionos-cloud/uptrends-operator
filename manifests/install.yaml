@@ -40,6 +40,15 @@ spec:
               description:
                 description: Description of the Monitor.
                 type: string
+              group:
+                description: MonitorGroup associates a monitor group.
+                properties:
+                  guid:
+                    description: GUID is the id of the monitor group.
+                    type: string
+                required:
+                - guid
+                type: object
               interval:
                 description: Interval of the Monitor.
                 type: integer
@@ -54,6 +63,7 @@ spec:
                 type: string
             required:
             - description
+            - group
             - interval
             - name
             - type

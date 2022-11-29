@@ -48,6 +48,14 @@ type UptrendsSpec struct {
 	Interval int `json:"interval"`
 	// Url of the Monitor.
 	Url string `json:"url"`
+	// MonitorGroup associates a monitor group.
+	Group MonitorGroup `json:"group"`
+}
+
+// MonitorGroup defines a monitor group.
+type MonitorGroup struct {
+	// GUID is the id of the monitor group.
+	GUID string `json:"guid"`
 }
 
 //+kubebuilder:object:root=true
