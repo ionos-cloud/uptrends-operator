@@ -53,6 +53,10 @@ This can be an interval from `1` to `60` minutes.
 
 > The annotations are evaluates agains the `host` fields on the `rules`. Wildcard hosts and empty hosts are ignored.
 
+### `uptrends.ionos-cloud.github.io/monitor.guid` Default: `""`
+
+This can be used to add the monitor to a Monitor Group identified with a `MonitorGroupID`.
+
 ## Examples
 
 [/examples](/examples/) contains the example of an `Ingress` and `Uptrends` based monitor.
