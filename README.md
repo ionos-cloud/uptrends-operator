@@ -57,6 +57,18 @@ This can be an interval from `1` to `60` minutes.
 
 This can be used to add the monitor to a Monitor Group identified with a `MonitorGroupID`.
 
+### `uptrends.ionos-cloud.github.io/monitor.regions` Default:`""`
+
+This is a list of regions to include as checkpoints. An example `"54,1007"`
+
+### `uptrends.ionos-cloud.github.io/monitor.checkpoints` Default:`""`
+
+This is a list of point of presence to include.
+
+### `uptrends.ionos-cloud.github.io/monitor.exclude` Default: `""`
+
+This is a list of point of presence to exclude as checkpoints.
+
 ## Examples
 
 [/examples](/examples/) contains the example of an `Ingress` and `Uptrends` based monitor.

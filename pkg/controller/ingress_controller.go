@@ -115,10 +115,11 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 				Name:      name,
 			},
 			Spec: v1alpha1.UptrendsSpec{
-				Name:     fmt.Sprintf("%s - Uptime", r.Host),
-				Interval: 5,
-				Type:     "HTTPS",
-				Group:    v1alpha1.MonitorGroup{},
+				Name:        fmt.Sprintf("%s - Uptime", r.Host),
+				Interval:    5,
+				Type:        "HTTPS",
+				Group:       v1alpha1.MonitorGroup{},
+				Checkpoints: v1alpha1.MonitorCheckpoints{},
 			},
 		}
 
@@ -129,6 +130,34 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 		if v, ok := annotations["interval"]; ok {
 			if i, err := strconv.Atoi(v); err == nil {
 				monitor.Spec.Interval = i
+			}
+		}
+
+		if v, ok := annotations["regions"]; ok {
+			regions := strings.Split(v, ",")
+
+			for _, r := range regions {
+				if i, err := strconv.Atoi(strings.TrimSpace(r)); err == nil {
+					monitor.Spec.Checkpoints.Regions = append(monitor.Spec.Checkpoints.Regions, int32(i))
+				}
+			}
+		}
+
+		if v, ok := annotations["checkpoints"]; ok {
+			checkpoints := strings.Split(v, ",")
+			for _, r := range checkpoints {
+				if i, err := strconv.Atoi(strings.TrimSpace(r)); err == nil {
+					monitor.Spec.Checkpoints.Checkpoints = append(monitor.Spec.Checkpoints.Checkpoints, int32(i))
+				}
+			}
+		}
+
+		if v, ok := annotations["exclude"]; ok {
+			excludes := strings.Split(v, ",")
+			for _, r := range excludes {
+				if i, err := strconv.Atoi(strings.TrimSpace(r)); err == nil {
+					monitor.Spec.Checkpoints.ExcludeCheckpoints = append(monitor.Spec.Checkpoints.ExcludeCheckpoints, int32(i))
+				}
 			}
 		}
 

@@ -146,6 +146,11 @@ func (m *monitorReconcile) reconcileUpdate(ctx context.Context, mon *v1alpha1.Up
 		MonitorType:   utils.PtrMonitor(sw.MonitorType(mon.Spec.Type)),
 		Notes:         mon.Spec.Description,
 		CheckInterval: int32(mon.Spec.Interval),
+		SelectedCheckpoints: &sw.SelectedCheckpoints{
+			Regions:          mon.Spec.Checkpoints.Regions,
+			Checkpoints:      mon.Spec.Checkpoints.Checkpoints,
+			ExcludeLocations: mon.Spec.Checkpoints.ExcludeCheckpoints,
+		},
 	}
 
 	_, err := client.MonitorApi.MonitorPatchMonitor(

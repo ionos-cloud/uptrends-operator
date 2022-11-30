@@ -36,6 +36,29 @@ spec:
           spec:
             description: UptrendsSpec defines the desired state of Uptrends
             properties:
+              checkpoints:
+                description: Checkpoints are the checkpoints to use for monitoring.
+                properties:
+                  checkpoints:
+                    description: Checkpoints are single point of presence to use.
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  exclude:
+                    description: ExcludeCheckpoints is a list of point of presence
+                      to execlude to use.
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                  regions:
+                    description: Regions is the set of entire regions to use.
+                    items:
+                      format: int32
+                      type: integer
+                    type: array
+                type: object
               description:
                 description: Description of the Monitor.
                 type: string
@@ -62,7 +85,6 @@ spec:
                 type: string
             required:
             - description
-            - group
             - interval
             - name
             - type

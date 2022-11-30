@@ -49,7 +49,19 @@ type UptrendsSpec struct {
 	// Url of the Monitor.
 	Url string `json:"url"`
 	// MonitorGroup associates a monitor group.
-	Group MonitorGroup `json:"group"`
+	Group MonitorGroup `json:"group,omitempty"`
+	// Checkpoints are the checkpoints to use for monitoring.
+	Checkpoints MonitorCheckpoints `json:"checkpoints,omitempty"`
+}
+
+// MonitorCheckpoints defines the set of point of presence to check from.
+type MonitorCheckpoints struct {
+	// Regions is the set of entire regions to use.
+	Regions []int32 `json:"regions,omitempty"`
+	// Checkpoints are single point of presence to use.
+	Checkpoints []int32 `json:"checkpoints,omitempty"`
+	// ExcludeCheckpoints is a list of point of presence to execlude to use.
+	ExcludeCheckpoints []int32 `json:"exclude,omitempty"`
 }
 
 // MonitorGroup defines a monitor group.
