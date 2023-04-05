@@ -309,7 +309,7 @@ func FindContainer(containers []corev1.Container, name string) (*corev1.Containe
 // desired state of that container should be reconciled inside updateFn. The
 // updated container slice is returned.
 func CreateOrUpdateContainer(containers []corev1.Container, name string, updateFn func(c *corev1.Container) error) ([]corev1.Container, error) {
-	res := make([]corev1.Container, len(containers))
+	res := make([]corev1.Container, 0)
 	copy(res, containers)
 
 	c, found := FindContainer(res, name)
@@ -340,7 +340,7 @@ func FindMonitor(monitors []v1alpha1.Uptrends, name string) (*v1alpha1.Uptrends,
 
 // CreateOrUpdateMonitor creates or updates a monitor for the given object.
 func CreateOrUpdateMonitor(monitors []v1alpha1.Uptrends, name string, updateFn func(m *v1alpha1.Uptrends) error) ([]v1alpha1.Uptrends, error) {
-	res := make([]v1alpha1.Uptrends, len(monitors))
+	res := make([]v1alpha1.Uptrends, 0)
 	copy(res, monitors)
 
 	m, found := FindMonitor(res, name)
@@ -364,7 +364,7 @@ func CreateOrUpdateMonitor(monitors []v1alpha1.Uptrends, name string, updateFn f
 // a envvar with the same name already existed it will be overwritten, otherwise
 // it will be appended.
 func MergeEnvVars(oldEnvs []corev1.EnvVar, newEnvs ...corev1.EnvVar) []corev1.EnvVar {
-	res := make([]corev1.EnvVar, len(oldEnvs))
+	res := make([]corev1.EnvVar, 0)
 	copy(res, oldEnvs)
 
 	for _, newEnv := range newEnvs {
