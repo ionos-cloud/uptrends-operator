@@ -21,7 +21,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-// NewMonitorController ...
+// NewMonitorController is returning a new controller for the Uptrends resource
 func NewMonitorController(mgr manager.Manager, creds *credentials.API) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.Uptrends{}).
@@ -39,7 +39,8 @@ type monitorReconcile struct {
 	scheme *runtime.Scheme
 }
 
-// Reconcile ...
+// Reconcile is the main function of the controller
+// It is called when a Uptrends resource is created, updated or deleted.
 func (m *monitorReconcile) Reconcile(ctx context.Context, r reconcile.Request) (reconcile.Result, error) {
 	log := ctrl.LoggerFrom(ctx)
 	log.Info("reconcile monitor", "name", r.Name, "namespace", r.Namespace)
@@ -132,6 +133,7 @@ func (m *monitorReconcile) reconcileStatus(ctx context.Context, uptrends *v1alph
 	return nil
 }
 
+//nolint:gocyclo
 func (m *monitorReconcile) reconcileUpdate(ctx context.Context, mon *v1alpha1.Uptrends) error {
 	auth := context.WithValue(ctx, sw.ContextBasicAuth, sw.BasicAuth{
 		UserName: m.creds.Username,
