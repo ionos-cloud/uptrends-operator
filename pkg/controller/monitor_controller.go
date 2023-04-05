@@ -107,6 +107,7 @@ func (m *monitorReconcile) reconcileDelete(ctx context.Context, mon *v1alpha1.Up
 	if err != nil && resp.StatusCode != http.StatusNotFound { // assume that this was already deleted
 		return err
 	}
+	defer func() { _ = resp.Body.Close() }()
 
 	mon.SetFinalizers(finalizers.RemoveFinalizer(mon, v1alpha1.FinalizerName))
 	err = m.Update(ctx, mon)
@@ -155,7 +156,7 @@ func (m *monitorReconcile) reconcileUpdate(ctx context.Context, mon *v1alpha1.Up
 		},
 	}
 
-	_, err := client.MonitorApi.MonitorPatchMonitor(
+	resp, err := client.MonitorApi.MonitorPatchMonitor(
 		auth,
 		mon.Status.MonitorGuid,
 		&sw.MonitorApiMonitorPatchMonitorOpts{
@@ -166,14 +167,16 @@ func (m *monitorReconcile) reconcileUpdate(ctx context.Context, mon *v1alpha1.Up
 	if err != nil {
 		return err
 	}
+	defer func() { _ = resp.Body.Close() }()
 
-	groups, _, err := client.MonitorApi.MonitorGetMonitorGroups(
+	groups, resp, err := client.MonitorApi.MonitorGetMonitorGroups(
 		auth,
 		mon.Status.MonitorGuid,
 	)
 	if err != nil {
 		return err
 	}
+	defer func() { _ = resp.Body.Close() }()
 
 	gg := make(map[string]bool)
 	for _, g := range groups {
@@ -182,18 +185,20 @@ func (m *monitorReconcile) reconcileUpdate(ctx context.Context, mon *v1alpha1.Up
 
 	if mon.Spec.Group.GUID == "" { // remove from all groups
 		for k := range gg {
-			res, err := client.MonitorGroupApi.MonitorGroupRemoveMonitorFromMonitorGroup(auth, k, mon.Status.MonitorGuid)
-			if err != nil && res.StatusCode != http.StatusBadRequest { // remove
+			resp, err := client.MonitorGroupApi.MonitorGroupRemoveMonitorFromMonitorGroup(auth, k, mon.Status.MonitorGuid)
+			if err != nil && resp.StatusCode != http.StatusBadRequest { // remove
 				return err
 			}
+			defer func() { _ = resp.Body.Close() }()
 		}
 	}
 
 	if _, ok := gg[mon.Spec.Group.GUID]; !ok && mon.Spec.Group.GUID != "" { // this
-		_, err := client.MonitorGroupApi.MonitorGroupAddMonitorToMonitorGroup(auth, mon.Spec.Group.GUID, mon.Status.MonitorGuid)
+		resp, err := client.MonitorGroupApi.MonitorGroupAddMonitorToMonitorGroup(auth, mon.Spec.Group.GUID, mon.Status.MonitorGuid)
 		if err != nil {
 			return err
 		}
+		defer func() { _ = resp.Body.Close() }()
 	}
 
 	return nil
@@ -215,7 +220,7 @@ func (m *monitorReconcile) reconcileCreate(ctx context.Context, mon *v1alpha1.Up
 		CheckInterval: int32(mon.Spec.Interval),
 	}
 
-	up, _, err := client.MonitorApi.MonitorPostMonitor(
+	up, res, err := client.MonitorApi.MonitorPostMonitor(
 		auth, &sw.MonitorApiMonitorPostMonitorOpts{
 			Monitor: optional.NewInterface(new),
 		},
@@ -223,12 +228,14 @@ func (m *monitorReconcile) reconcileCreate(ctx context.Context, mon *v1alpha1.Up
 	if err != nil {
 		return err
 	}
+	defer func() { _ = res.Body.Close() }()
 
 	if mon.Spec.Group.GUID != "" {
-		_, err := client.MonitorGroupApi.MonitorGroupAddMonitorToMonitorGroup(auth, mon.Spec.Group.GUID, up.MonitorGuid)
+		res, err := client.MonitorGroupApi.MonitorGroupAddMonitorToMonitorGroup(auth, mon.Spec.Group.GUID, up.MonitorGuid)
 		if err != nil {
 			return err
 		}
+		defer func() { _ = res.Body.Close() }()
 	}
 
 	mon.SetFinalizers(finalizers.AddFinalizer(mon, v1alpha1.FinalizerName))

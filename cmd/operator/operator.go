@@ -126,6 +126,7 @@ func run(ctx context.Context) error {
 
 	setupLog.Info("starting manager")
 
+	//nolint:contextcheck
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		return err
 	}

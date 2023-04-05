@@ -198,6 +198,7 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 	// clean up
 	if len(existingNames) > 0 {
 		for _, v := range existingNames {
+			v := v
 			err := c.Delete(ctx, &v)
 			if err != nil {
 				return err
