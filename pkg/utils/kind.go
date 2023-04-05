@@ -262,7 +262,7 @@ func MergeTaints(oldTaints []corev1.Taint, newTaints ...corev1.Taint) []corev1.T
 	res := make([]corev1.Taint, len(oldTaints))
 	copy(res, oldTaints)
 
-	for _, newTaint := range newTaints {
+	for i, newTaint := range newTaints {
 		var found bool
 		for i, oldTaint := range oldTaints {
 			if oldTaint.Key == newTaint.Key {
@@ -271,7 +271,7 @@ func MergeTaints(oldTaints []corev1.Taint, newTaints ...corev1.Taint) []corev1.T
 			}
 		}
 		if !found {
-			res = append(res, newTaint)
+			res[i] = newTaint
 		}
 	}
 	return res

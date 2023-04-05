@@ -10,11 +10,18 @@ IMAGE_TAG_BASE ?= ghcr.io/ionos-cloud/uptrends-operator/operator
 
 IMG ?= $(IMAGE_TAG_BASE):v$(VERSION)
 
+# GO related variables.
+GO ?= go
+GO_RUN_TOOLS ?= $(GO) run -modfile ./tools/go.mod
+GO_TEST = $(GO_RUN_TOOLS) gotest.tools/gotestsum --format pkgname
+GO_RELEASER ?= $(GO_RUN_TOOLS) github.com/goreleaser/goreleaser
+
 ##@ Development
 
+.PHONY: generate
 generate:
-	@go generate ./...
-	@go run cmd/manifest/manifest.go --file manifests/crd/bases/operators.ionos-cloud.github.io_uptrends.yaml \
+	$(GO) generate ./...
+	$(GO) run cmd/manifest/manifest.go --file manifests/crd/bases/operators.ionos-cloud.github.io_uptrends.yaml \
 		--file manifests/install/service_account.yaml \
 		--file manifests/install/cluster_role.yaml \
 		--file manifests/install/cluster_role_binding.yaml \
@@ -25,22 +32,19 @@ generate:
 
 .PHONY: fmt
 fmt: ## Run go fmt against code.
-	go run mvdan.cc/gofumpt -w .
+	$(GO_RUN_TOOLS) mvdan.cc/gofumpt -w .
 
 .PHONY: vet
 vet: ## Run go vet against code.
-	go vet ./...
+	$(GO) vet ./...
+
+.PHONY: lint
+lint: ## Run lint.
+	$(GO_RUN_TOOLS) github.com/golangci/golangci-lint/cmd/golangci-lint run --timeout 5m -c .golangci.yml
 
 .PHONY: build
-build:
-	@goreleaser build --rm-dist --snapshot
-
-.PHONY: vendor
-vendor: export GOPRIVATE=github.com/ionos-cloud
-vendor:
-	@go mod tidy
-	@go mod vendor
-	@go get -u ./...
+build: ## Build manager binary.
+	$(GO_RELEASER) build --rm-dist --snapshot
 
 ##@ Deployment
 
@@ -66,5 +70,6 @@ $(ENVTEST): $(LOCALBIN)
 	test -s $(LOCALBIN)/setup-envtest || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
 .PHONY: test
-test: envtest
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test ./... -coverprofile cover.out
+test: envtest ## Run tests.
+	mkdir -p .test/reports
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" $(GO_TEST) --junitfile .test/reports/unit-test.xml -- -race ./... -count=1 -short -cover -coverprofile .test/reports/unit-test-coverage.out
