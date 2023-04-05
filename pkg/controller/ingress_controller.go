@@ -40,7 +40,8 @@ type ingressReconciler struct {
 	scheme *runtime.Scheme
 }
 
-// Reconcile ...
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the cluster closer to the desired state.
 func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) (reconcile.Result, error) {
 	log := ctrl.LoggerFrom(ctx)
 	log.Info("reconcile ingress", "name", r.Name, "namespace", r.Namespace)
@@ -77,6 +78,7 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 	return reconcile.Result{}, nil
 }
 
+//nolint:gocyclo
 func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networkingv1.Ingress) error {
 	existingMonitors := &v1alpha1.UptrendsList{}
 	err := c.List(ctx, existingMonitors, client.InNamespace(in.Namespace))
@@ -196,6 +198,7 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 	// clean up
 	if len(existingNames) > 0 {
 		for _, v := range existingNames {
+			v := v
 			err := c.Delete(ctx, &v)
 			if err != nil {
 				return err
@@ -212,6 +215,7 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 	return nil
 }
 
+//nolint:gocyclo
 func (c *ingressReconciler) reconcileDelete(ctx context.Context, in *networkingv1.Ingress) (reconcile.Result, error) {
 	items := make(map[string]string)
 
