@@ -44,7 +44,7 @@ lint: ## Run lint.
 
 .PHONY: build
 build: ## Build manager binary.
-	$(GO_RELEASER) build --rm-dist --snapshot
+	$(GO_RELEASER) build --clean --snapshot
 
 ##@ Deployment
 
