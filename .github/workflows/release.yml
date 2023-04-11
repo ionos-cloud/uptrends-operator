@@ -43,7 +43,7 @@ jobs:
       if: success()
     - run: |
           go run cmd/updater/updater.go --file charts/uptrends/Chart.yaml --version ${{ env.RELEASE_VERSION }}
-    - uses: helm/chart-releaser-action@v1.4.1
+    - uses: helm/chart-releaser-action@v1.5.0
       env:
         CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
       with:
