@@ -74,7 +74,7 @@ func (m *monitorReconcile) Reconcile(ctx context.Context, r reconcile.Request) (
 
 	err = m.reconcileResources(ctx, mon)
 	if err != nil {
-		log.Error(err, "could not reconcile resource")
+		log.Error(err, err.Error())
 		// Error reconciling uptrends sub-resources - requeue the request.
 		return reconcile.Result{}, err
 	}
