@@ -676,6 +676,8 @@ github.com/ionos-cloud/uptrends-go v0.0.0-20221119194631-e75f6a308bc7 h1:hsT2kve
 github.com/ionos-cloud/uptrends-go v0.0.0-20221119194631-e75f6a308bc7/go.mod h1:nDE2WF7986H2iW9HwsujpT5WrLjTQXe5AdKKh0x23Wk=
 github.com/ionos-cloud/uptrends-go v0.0.0-20230411151518-62e7840601a0 h1:+EK1fyyERg+jk7FXJqATMqNZnmUILsyWhhf+uTYqw2o=
 github.com/ionos-cloud/uptrends-go v0.0.0-20230411151518-62e7840601a0/go.mod h1:nDE2WF7986H2iW9HwsujpT5WrLjTQXe5AdKKh0x23Wk=
+github.com/ionos-cloud/uptrends-go v0.0.0-20230411153400-493f3b7ca7cf h1:Tm+va+cqxbdQ2kPtRl1/+WYt1DUGjxEZds9bzV9A20g=
+github.com/ionos-cloud/uptrends-go v0.0.0-20230411153400-493f3b7ca7cf/go.mod h1:nDE2WF7986H2iW9HwsujpT5WrLjTQXe5AdKKh0x23Wk=
 github.com/jessevdk/go-flags v1.4.0/go.mod h1:4FA24M0QyGHXBuZZK/XkWh8h0e1EYbRYJSGM75WSRxI=
 github.com/jgautheron/goconst v1.5.1 h1:HxVbL1MhydKs8R8n/HE5NPvzfaYmQJA3o879lE4+WcM=
 github.com/jgautheron/goconst v1.5.1/go.mod h1:aAosetZ5zaeC/2EfMeRswtxUFBpe2Hr7HzkgX4fanO4=

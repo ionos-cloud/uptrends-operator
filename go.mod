@@ -9,7 +9,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.43.0
 	github.com/helm/chart-releaser v1.5.0
-	github.com/ionos-cloud/uptrends-go v0.0.0-20230411151518-62e7840601a0
+	github.com/ionos-cloud/uptrends-go v0.0.0-20230411153400-493f3b7ca7cf
 	github.com/prometheus/client_golang v1.12.2
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/pflag v1.0.5
