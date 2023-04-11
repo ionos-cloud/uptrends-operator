@@ -3,7 +3,7 @@ project_name: uptrends-operator
 builds:
   -
     id: operator
-    binary: operator-{{.OS}}-{{.Arch}}
+    binary: operator-{{.Os}}-{{.Arch}}
     main: cmd/operator/operator.go
     goos:
       - linux
