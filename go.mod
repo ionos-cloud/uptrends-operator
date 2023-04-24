@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.15.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
-	golang.org/x/mod v0.9.0
+	golang.org/x/mod v0.10.0
 	helm.sh/helm v2.17.0+incompatible
 	k8s.io/api v0.25.4
 	k8s.io/apimachinery v0.25.4
