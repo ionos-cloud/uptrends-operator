@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/antihax/optional v1.0.0
 	github.com/caarlos0/env/v6 v6.10.1
-	github.com/go-logr/logr v1.2.3
+	github.com/go-logr/logr v1.2.4
 	github.com/golang/mock v1.6.0
 	github.com/golangci/golangci-lint v1.52.2
 	github.com/helm/chart-releaser v1.5.0
