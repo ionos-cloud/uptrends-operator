@@ -67,6 +67,10 @@ This is a list of point of presence to include.
 
 This is a list of point of presence to exclude as checkpoints.
 
+### `uptrends.ionos-cloud.github.io/monitor.exclude-from-monitoring: ""`
+
+This excludes an ingress from monitoring
+
 ## Examples
 
 [/examples](/examples/) contains the example of an `Ingress` and `Uptrends` based monitor.
