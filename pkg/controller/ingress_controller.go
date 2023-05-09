@@ -70,6 +70,17 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 		return ctrl.Result{}, nil
 	}
 
+	// Delete if annotation is set
+	exclude_annotation := fmt.Sprintf("%sexclude-from-monitoring", v1alpha1.AnnotationPrefix)
+	if _, ok := in.ObjectMeta.Annotations[exclude_annotation]; ok {
+		if finalizers.HasFinalizer(in, v1alpha1.FinalizerName) {
+			return c.reconcileDelete(ctx, in)
+		}
+
+		// Delete success
+		return ctrl.Result{}, nil
+	}
+
 	err = c.reconcileResources(ctx, in)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -105,6 +116,10 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 		}
 
 		if strings.HasPrefix(r.Host, "*") {
+			continue
+		}
+
+		if _, ok := annotations["exclude-from-monitoring"]; ok {
 			continue
 		}
 
