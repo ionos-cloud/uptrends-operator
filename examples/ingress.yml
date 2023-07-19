@@ -8,7 +8,6 @@ metadata:
     uptrends.ionos-cloud.github.io/monitor.guid: ""
     uptrends.ionos-cloud.github.io/monitor.regions: "54,1007"
     uptrends.ionos-cloud.github.io/monitor.checkpoints: ""
-    uptrends.ionos-cloud.github.io/monitor.exclude: ""
 spec:
   rules:
   - host: ionos.com
