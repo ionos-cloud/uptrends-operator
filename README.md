@@ -39,7 +39,12 @@ This configures the required password for the uptrends API access. See the [uptr
 
 ## Annotations
 
-The operator supports creating a monitor via the `Uptrends` kind, but also via annotations on an `Ingress`. The following keys are supported.
+The operator supports creating a monitor via the `Uptrends` kind, but also via annotations on an `Ingress`.
+
+The operator will create an uptrend in case the ingress has this annotation: `uptrends.ionos-cloud.github.io/monitor`,
+otherwise the ingress will not be monitored.
+
+The following keys are supported:
 
 ###  `uptrends.ionos-cloud.github.io/monitor.type` Default: `HTTPS`
 
@@ -67,9 +72,6 @@ This is a list of point of presence to include.
 
 This is a list of point of presence to exclude as checkpoints.
 
-### `uptrends.ionos-cloud.github.io/monitor.exclude-from-monitoring: ""`
-
-This excludes an ingress from monitoring
 
 ## Examples
 
