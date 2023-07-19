@@ -18,10 +18,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -29,17 +27,10 @@ const (
 	IngressUptrendAnnotation = "uptrends.ionos-cloud.github.io/monitor"
 )
 
-var HasIngressUptrendAnnotation = predicate.NewPredicateFuncs(func(obj client.Object) bool {
-	if _, ok := obj.GetAnnotations()[IngressUptrendAnnotation]; ok {
-		return true
-	}
-	return false
-})
-
 // NewIngressController ...
 func NewIngressController(mgr manager.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&networkingv1.Ingress{}, builder.WithPredicates(HasIngressUptrendAnnotation)).
+		For(&networkingv1.Ingress{}).
 		Complete(&ingressReconciler{
 			Client: mgr.GetClient(),
 			scheme: mgr.GetScheme(),
@@ -67,25 +58,27 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 		return ctrl.Result{}, fmt.Errorf("ingress not found name %s namespace %s %w", r.Name, r.Namespace, err)
 	}
 
+	// Delete if timestamp is set
+	if !in.ObjectMeta.DeletionTimestamp.IsZero() {
+		if finalizers.HasFinalizer(in, v1alpha1.FinalizerName) {
+			return c.reconcileDelete(ctx, in)
+		}
+		// Delete success
+		return ctrl.Result{}, nil
+	}
+
 	if v, ok := in.GetAnnotations()[IngressUptrendAnnotation]; ok {
 		if v == "true" {
-			// Delete if timestamp is set
-			if !in.ObjectMeta.DeletionTimestamp.IsZero() {
-				if finalizers.HasFinalizer(in, v1alpha1.FinalizerName) {
-					return c.reconcileDelete(ctx, in)
-				}
-				// Delete success
-				return ctrl.Result{}, nil
-			}
-
 			err = c.reconcileResources(ctx, in)
 			if err != nil {
 				return reconcile.Result{}, err
 			}
+		} else {
+			return c.reconcileDelete(ctx, in)
 		}
 	} else {
 		// return nil cause the annotation is not set.
-		return ctrl.Result{}, nil
+		return c.reconcileDelete(ctx, in)
 	}
 
 	return reconcile.Result{}, nil
