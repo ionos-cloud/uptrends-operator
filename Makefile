@@ -16,6 +16,8 @@ GO_RUN_TOOLS ?= $(GO) run -modfile ./tools/go.mod
 GO_TEST = $(GO_RUN_TOOLS) gotest.tools/gotestsum --format pkgname
 GO_RELEASER ?= $(GO_RUN_TOOLS) github.com/goreleaser/goreleaser
 
+DOCKER ?= docker
+
 ##@ Development
 
 .PHONY: generate
@@ -73,3 +75,8 @@ $(ENVTEST): $(LOCALBIN)
 test: envtest ## Run tests.
 	mkdir -p .test/reports
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" $(GO_TEST) --junitfile .test/reports/unit-test.xml -- -race ./... -count=1 -short -cover -coverprofile .test/reports/unit-test-coverage.out
+
+
+.PHONY: docker-build
+docker-build: ## Build the docker image for operator
+	DOCKER_BUILDKIT=1 $(DOCKER) build --build-arg ARCH=$(ARCH) --build-arg package=./cmd/operator --build-arg LDFLAGS="$(LDFLAGS)" . -t $(IMG)

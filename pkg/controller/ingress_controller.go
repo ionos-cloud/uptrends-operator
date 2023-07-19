@@ -13,22 +13,33 @@ import (
 
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	k8sapierror "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 )
+
+const (
+	IngressUptrendAnnotation = "uptrends.ionos-cloud.github.io/monitor"
+)
+
+var HasIngressUptrendAnnotation = predicate.NewPredicateFuncs(func(obj client.Object) bool {
+	if _, ok := obj.GetAnnotations()[IngressUptrendAnnotation]; ok {
+		return true
+	}
+	return false
+})
 
 // NewIngressController ...
 func NewIngressController(mgr manager.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&networkingv1.Ingress{}).
-		Watches(&source.Kind{Type: &networkingv1.Ingress{}}, &handler.EnqueueRequestForObject{}).
+		For(&networkingv1.Ingress{}, builder.WithPredicates(HasIngressUptrendAnnotation)).
 		Complete(&ingressReconciler{
 			Client: mgr.GetClient(),
 			scheme: mgr.GetScheme(),
@@ -48,42 +59,33 @@ func (c *ingressReconciler) Reconcile(ctx context.Context, r reconcile.Request) 
 
 	in := &networkingv1.Ingress{}
 	err := c.Get(ctx, r.NamespacedName, in)
-	if err != nil && errors.IsNotFound(err) {
-		// Object not found, return. Created objects are automatically garbage collected.
-		log.Info("ingress not found", "name", r.Name, "namespace", r.Namespace)
-
-		return ctrl.Result{}, nil
-	}
-
 	if err != nil {
-		// Error reading the object - requeue the request.
-		return reconcile.Result{}, err
-	}
-
-	// Delete if timestamp is set
-	if !in.ObjectMeta.DeletionTimestamp.IsZero() {
-		if finalizers.HasFinalizer(in, v1alpha1.FinalizerName) {
-			return c.reconcileDelete(ctx, in)
+		if k8sapierror.IsNotFound(err) {
+			log.Info("Ignoring cached Ingress that must have been deleted")
+			return ctrl.Result{}, nil
 		}
-
-		// Delete success
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, fmt.Errorf("ingress not found name %s namespace %s %w", r.Name, r.Namespace, err)
 	}
 
-	// Delete if annotation is set
-	exclude_annotation := fmt.Sprintf("%sexclude-from-monitoring", v1alpha1.AnnotationPrefix)
-	if _, ok := in.ObjectMeta.Annotations[exclude_annotation]; ok {
-		if finalizers.HasFinalizer(in, v1alpha1.FinalizerName) {
-			return c.reconcileDelete(ctx, in)
+	if v, ok := in.GetAnnotations()[IngressUptrendAnnotation]; ok {
+		if v == "true" {
+			// Delete if timestamp is set
+			if !in.ObjectMeta.DeletionTimestamp.IsZero() {
+				if finalizers.HasFinalizer(in, v1alpha1.FinalizerName) {
+					return c.reconcileDelete(ctx, in)
+				}
+				// Delete success
+				return ctrl.Result{}, nil
+			}
+
+			err = c.reconcileResources(ctx, in)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
 		}
-
-		// Delete success
+	} else {
+		// return nil cause the annotation is not set.
 		return ctrl.Result{}, nil
-	}
-
-	err = c.reconcileResources(ctx, in)
-	if err != nil {
-		return reconcile.Result{}, err
 	}
 
 	return reconcile.Result{}, nil
@@ -116,10 +118,6 @@ func (c *ingressReconciler) reconcileResources(ctx context.Context, in *networki
 		}
 
 		if strings.HasPrefix(r.Host, "*") {
-			continue
-		}
-
-		if _, ok := annotations["exclude-from-monitoring"]; ok {
 			continue
 		}
 
