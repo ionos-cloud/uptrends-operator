@@ -41,7 +41,7 @@ This configures the required password for the uptrends API access. See the [uptr
 
 The operator supports creating a monitor via the `Uptrends` kind, but also via annotations on an `Ingress`.
 
-The operator will create an uptrend in case the ingress has this annotation: `uptrends.ionos-cloud.github.io/monitor`,
+The operator will create an uptrend in case the ingress has this annotation: `uptrends.ionos-cloud.github.io/monitor: "true"`,
 otherwise the ingress will not be monitored.
 
 The following keys are supported:
