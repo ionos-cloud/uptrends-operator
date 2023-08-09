@@ -6,12 +6,24 @@ metadata:
     {{- include "uptrends.labels" (dict "context" . "component" .Values.controller.name "name" .Values.controller.name) | nindent 4 }}
 rules:
 - apiGroups:
-  - '*'
+  - networking.k8s.io
   resources:
-  - '*'
+  - ingresses
   verbs:
-  - '*'
-- nonResourceURLs:
-  - '*'
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - operators.ionos-cloud.github.io
+  resources:
+  - uptrends
+  - uptrends/status
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
